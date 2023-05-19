@@ -16,4 +16,17 @@ class ClientsController extends AbstractController
             'path' => 'src/Controller/ClientsController.php',
         ]);
     }
+    #[Route('/clients/{id}', name: 'clients_show')]
+    public function show(EntityManagerInterface $entityManager,Request $request): Response
+    {
+        $clients = $entityManager->getRepository(Clients::class)->find($id);
+
+        if (!$clients) {
+            throw $this->createNotFoundException(
+                'Il y a pas un client pour ce ID : '.$id
+            );
+        }
+
+        return new Response($clients->getName());
+    }
 }

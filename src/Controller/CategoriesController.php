@@ -16,4 +16,11 @@ class CategoriesController extends AbstractController
             'path' => 'src/Controller/CategoriesController.php',
         ]);
     }
+    #[Route('/categories/{id}', name: 'categories_show')]
+    public function show(EntityManagerInterface $entityManager,Request $request): Response
+    {
+        $categories = $entityManager->getRepository(Categories::class)->find($id);
+
+        return new Response($categories->getName());
+    }
 }

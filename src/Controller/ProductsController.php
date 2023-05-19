@@ -16,6 +16,19 @@ class ProductsController extends AbstractController
             'path' => 'src/Controller/ProductsController.php',
         ]);
     }
+    #[Route('/products/{id}', name: 'products_show')]
+    public function show(EntityManagerInterface $entityManager,Request $request): Response
+    {
+        $products = $entityManager->getRepository(Products::class)->find($id);
+
+        if (!$products) {
+            throw $this->createNotFoundException(
+                'Il y a pas un produit pour ce ID : '.$id
+            );
+        }
+
+        return new Response($products->getName());
+    }
     #[Route('/products', name: 'create_products')]
     public function createProducts(EntityManagerInterface $entityManager,Request $request): Response
     {
@@ -29,7 +42,7 @@ class ProductsController extends AbstractController
         $entityManager->persist($products);
         $entityManager->flush();
 
-        return new Response($product->getId());
+        return new Response($products->getId());
     }
     #[Route('/products/edit/{id}', name: 'products_edit')]
     public function update(EntityManagerInterface $entityManager, Request $request): Response
@@ -41,6 +54,19 @@ class ProductsController extends AbstractController
         $products->setSlug($res->slug);
         $products->setStock($res->stock);
         $products->setCategory($res->category);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('products_show', [
+            'id' => $products->getId()
+        ]);
+    }
+    #[Route('/products/delete/{id}', name: 'products_delete')]
+    public function delete(EntityManagerInterface $entityManager, Request $request): Response
+    {
+        $res = $request->getContent();
+        $products = $entityManager->getRepository(Products::class)->find($res->id);
+
+        $entityManager->remove($products);
         $entityManager->flush();
 
         return $this->redirectToRoute('products_show', [
